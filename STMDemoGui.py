@@ -1,5 +1,4 @@
 
-
 from __future__ import annotations
 import time, threading, csv, re
 from typing import Optional, Set
@@ -184,9 +183,9 @@ class SerialClient:
 
 # ------------------ GUI ------------------
 class DevicePanel(ttk.Frame):
-    MAX_HEX_LINES = 1500
+    MAX_HEX_LINES = 1800
     KEEP_HEX_LINES = 1200
-    MAX_LOG_LINES = 1200
+    MAX_LOG_LINES = 1500
     KEEP_LOG_LINES = 900
 
     def __init__(self, master, idx:int):
@@ -228,11 +227,11 @@ class DevicePanel(ttk.Frame):
         try: st.theme_use('clam')
         except: pass
 
-        # renkler
-        bg = "#0f172a"
-        card_bg = "#111827"
-        card_bd = "#1f2937"
-        txt = "#e5e7eb"
+        # AÇIK TEMA (yalnızca renkler değiştirildi)
+        bg = "#f4f5f7"        # kök arka plan
+        card_bg = "#ffffff"   # kartlar
+        card_bd = "#d1d5db"   # kart kenar çizgisi
+        txt = "#111827"       # temel metin
         acc = "#2563eb"
         acc_act = "#1d4ed8"
         danger = "#dc2626"
@@ -244,7 +243,7 @@ class DevicePanel(ttk.Frame):
         st.configure("Header.TLabel", background=bg, foreground=txt, font=('Segoe UI', 12, 'bold'))
 
         st.configure("Card.TLabelframe", background=card_bg, foreground=txt, bordercolor=card_bd, relief="solid")
-        st.configure("Card.TLabelframe.Label", background=card_bg, foreground="#cbd5e1", font=('Segoe UI', 10, 'bold'))
+        st.configure("Card.TLabelframe.Label", background=card_bg, foreground="#374151", font=('Segoe UI', 10, 'bold'))
         st.configure("TLabel", background=card_bg, foreground=txt)
         st.configure("TFrame", background=card_bg)
         st.configure("TNotebook", background=bg, tabmargins=[8,6,8,0])
@@ -257,8 +256,8 @@ class DevicePanel(ttk.Frame):
         st.map("Danger.TButton", background=[('active',danger_act)])
         st.configure("Tool.TButton", padding=(6,2))
 
-        st.configure("Status.TFrame", background="#0b1220")
-        st.configure("Status.TLabel", background="#0b1220", foreground="#cbd5e1", font=('Segoe UI', 9))
+        st.configure("Status.TFrame", background="#eef2f7")
+        st.configure("Status.TLabel", background="#eef2f7", foreground="#374151", font=('Segoe UI', 9))
 
     # ---------- utils ----------
     def _trim_text_lines(self, widget: tk.Text, max_lines:int, keep_lines:int):
@@ -349,13 +348,14 @@ class DevicePanel(ttk.Frame):
         ntcf.grid_columnconfigure(tuple(range(5)), weight=1)
         self.ntc_tiles=[]; cols=5
         for i in range(20):
-            f=tk.Frame(ntcf,bd=1,relief='solid',width=110,height=56,bg="#1f2937")
+            # normalde koyu gri idi → beyaz
+            f=tk.Frame(ntcf,bd=1,relief='solid',width=180,height=100,bg="#ffffff")
             r=i//cols; c=i%cols
             f.grid(row=r,column=c,padx=4,pady=4,sticky="nsew")
             f.grid_propagate(False)
-            l1=tk.Label(f,text=f"N{i+1}",font=("Segoe UI",9,"bold"),bg=f["bg"],fg="#93c5fd")
+            l1=tk.Label(f,text=f"N{i+1}",font=("Segoe UI",9,"bold"),bg=f["bg"],fg="#2563eb")
             l1.pack(anchor='nw',padx=6,pady=(6,0))
-            l2=tk.Label(f,text="0.0 °C",font=("Segoe UI",12,"bold"),bg=f["bg"],fg="#e5e7eb")
+            l2=tk.Label(f,text="0.0 °C",font=("Segoe UI",12,"bold"),bg=f["bg"],fg="#111827")
             l2.pack(expand=True)
             self.ntc_tiles.append((f,l1,l2))
         mm=ttk.Frame(ntcf)
@@ -435,13 +435,14 @@ class DevicePanel(ttk.Frame):
         lab=ttk.Frame(mon); lab.pack(fill='x', padx=8, pady=(6,0))
         ttk.Label(lab,textvariable=self.last_tx).pack(side='left',padx=(2,8))
         ttk.Label(lab,textvariable=self.last_rx).pack(side='left',padx=(2,8))
-        self.hextext=tk.Text(mon,height=10,bg="#0b1220",fg="#e5e7eb",insertbackground="#e5e7eb",bd=0, highlightthickness=0)
+        # daha açık metin alanı
+        self.hextext=tk.Text(mon,height=10,bg="#f9fafb",fg="#111827",insertbackground="#111827",bd=1, highlightthickness=0)
         self.hextext.pack(fill='both',expand=True,padx=8,pady=(4,6))
-        self.logtext=tk.Text(mon,height=8,bg="#0b1220",fg="#e5e7eb",insertbackground="#e5e7eb",bd=0, highlightthickness=0)
+        self.logtext=tk.Text(mon,height=8,bg="#f9fafb",fg="#111827",insertbackground="#111827",bd=1, highlightthickness=0)
         self.logtext.pack(fill='both',expand=True,padx=8,pady=(0,8))
-        self.logtext.tag_configure("error", foreground="#f87171")  # kırmızı
+        self.logtext.tag_configure("error", foreground="#b91c1c")  # kırmızı
 
-        # alt durum barı
+        # alt durum barı (açık gri)
         foot = ttk.Frame(self, style="Status.TFrame")
         foot.grid(row=4, column=0, sticky="ew")
         ttk.Label(foot, text="Electronic–static pairs: only one electronic channel may be ON.", style="Status.TLabel").pack(side='right', padx=10, pady=4)
@@ -770,9 +771,10 @@ class DevicePanel(ttk.Frame):
         deg=val/10.0
         f,l1,l2=self.ntc_tiles[i]
         hot=(val>self.NTC_LIMIT)
-        f.configure(bg=("#7f1d1d" if hot else "#1f2937"))
+        # koyu yerine açık: sıcak ise açık kırmızı, değilse beyaz
+        f.configure(bg=("#fde2e2" if hot else "#ffffff"))
         l1.configure(bg=f['bg']); l2.configure(bg=f['bg'])
-        l2.configure(text=f"{deg:.1f} °C")
+        l2.configure(fg="#111827", text=f"{deg:.1f} °C")
 
 class App(tk.Tk):
     def __init__(self):
@@ -780,7 +782,7 @@ class App(tk.Tk):
         self.title('STM Relay/NTC/FAN/OLED GUI — CRC8')
         self.geometry('1320x900')
         self.minsize(1100, 760)
-        self['background']="#0f172a"
+        self['background']="#f4f5f7"  # açık arka plan
 
         top=ttk.Frame(self, style="Header.TFrame"); top.pack(fill='x',pady=(6,4))
         ttk.Button(top,text='Global Scan Ports',command=self.scan_ports,style="Tool.TButton").pack(side='left',padx=8)
