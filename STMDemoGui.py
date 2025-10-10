@@ -1,9 +1,4 @@
-# -*- coding: utf-8 -*-
-"""
-STM GUI — Relay / NTC / FAN / OLED  (CRC8-ATM çerçeve)
-- Tamamen metin tabanlı başlıklar ve durumlar (emoji/resim yok)
-- Önceki sürümle aynı mantık ve protokol işleyişi
-"""
+
 
 from __future__ import annotations
 import time, threading, csv, re
