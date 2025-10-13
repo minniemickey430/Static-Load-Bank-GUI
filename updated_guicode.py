@@ -7,7 +7,7 @@ from typing import Optional, List, Tuple
 # ---- Protokol sabitleri (relay_manager.h ile uyumlu) ----
 STX = 0xAA
 ETX = 0x55
-
+BAUD = 115200
 CMD_RELAY_CONTROL   = 0x10
 CMD_FAN_CONTROL     = 0x20
 CMD_TEMPERATURE     = 0x30
