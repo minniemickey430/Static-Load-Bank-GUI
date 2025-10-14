@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-STM GUI — Relay / NTC / FAN / OLED  (CRC8-ATM çerçeve)
-- Tamamen metin tabanlı başlıklar ve durumlar (emoji/resim yok)
-- Önceki sürümle aynı mantık ve protokol işleyişi
-- SADECE RENK TEMASI GÜNCELLENDİ (daha aydınlık)
-"""
 
 from __future__ import annotations
 import time, threading, csv, re
@@ -453,7 +446,7 @@ class DevicePanel(ttk.Frame):
         ttk.Button(opt,text="All OFF",style='Danger.TButton',command=self.all_off).pack(side='left', padx=(4,6))
         ttk.Button(opt,text="All ON (static)",style='Accent.TButton',command=self.all_on).pack(side='left')
 
-        rule_lbl = ttk.Label(opt, text="Note: In electronic–static pairs, only ONE electronic channel can be ON at a time.")
+        rule_lbl = ttk.Label(opt, text="Note: In electronic–static pairs, only ONE electronic channel may be ON at a time.")
         rule_lbl.pack(side='right', padx=8)
 
         # Sağ kolon: Fan/OLED + Monitor
@@ -568,7 +561,7 @@ class DevicePanel(ttk.Frame):
         self.client = None
 
         self.btn_disconnect.configure(state='disabled')
-        self.btn_connect.configure(state='normal'])
+        self.btn_connect.configure(state='normal')
         self.set_status("Disconnected")
 
     def send_and_log(self, frame:bytes, note:str):
@@ -717,6 +710,18 @@ class DevicePanel(ttk.Frame):
             return
 
         if cmd==CMD_EVT:
+            # Özel durum: AA .. 50 02 00 E8 .. 55 → sub=0x00, a1=0xE8
+            if sub == 0x00 and a1 == 0xE8:
+                self.log("[EVT] System Reset")
+                # İstersen mevcut davranışla uyumlu olarak röle görünümünü temiz tutalım:
+                for i in range(40):
+                    if self.relays[i]!=0:
+                        self.relays[i]=0
+                        self._paint(i)
+                self.set_status("Warning: system reset")
+                self._csv_tick()
+                return
+
             msg = SYS_STATUS_MAP.get(a1)
             if msg:
                 self.log_error(f"[EVT] 0x{a1:02X} → {msg}")
@@ -725,7 +730,7 @@ class DevicePanel(ttk.Frame):
                     if self.relays[i]!=0:
                         self.relays[i]=0
                         self._paint(i)
-                self.set_status("Warning: system event (reset?)")
+                self.set_status("Warning: system event (init/reset?)")
                 self.log("[EVT] System event received (init/reset?)")
             self._csv_tick()
             return
