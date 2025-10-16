@@ -1,4 +1,5 @@
 ##insallah bu sondur
+##insallah ustam balık küfteli dülüm
 from __future__ import annotations
 import time, threading, csv, re, os, sys, subprocess
 from typing import Optional, Dict, List
